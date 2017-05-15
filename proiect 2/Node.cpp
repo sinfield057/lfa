@@ -28,6 +28,15 @@ void Node::add_relay( std::string key, int node ) {
 	}
 }
 
+void Node::reset_relay( std::string key, int node ) {
+	_relays[ node ] = key;
+}
+
+std::string Node::get_relay( int node ) {
+	return _relays.find( node ) != _relays.end() ? _relays[ node ] : "";
+}
+
+
 void Node::delete_relay( int node ) {
 		_relays.erase( node );
 }

@@ -11,7 +11,7 @@
 
 int main(int argc, char const *argv[]) {
 	
-    std::ifstream f( "date.in", std::ios_base::in );	
+    std::ifstream f( "date_test.in", std::ios_base::in );	
 	
 	// Number of relays
 	int n;
@@ -68,23 +68,52 @@ int main(int argc, char const *argv[]) {
 	node_list[ START ].add_relay( LAMBDA, n );
 
 	// Creating the RE
-	for ( std::map< int, Node >::iterator it = node_list.begin(); it != node_list.end(); ++it ) {
+	for ( std::map< int, Node >::iterator it = node_list.begin(); it != node_list.end(); ) {
 
 		Node current_node = it->second;
 		std::map< int, std::string > current_node_relay_list = current_node.get_relays();
-		if( current_node.get_value() != START && current_node.get_value() != FINAL ) {
-			
-			for( std::map< int, Node >::iterator node = node_list.begin(); node != node_list.end(); node++ ) {
-				if( node->first != it->first ) {
-					std::map< int, std::string > node_relay_list = node->second.get_relays();
-					if( node_relay_list.count( current_node.get_value() ) ) {
-						for( std::map< int, std::string >::iterator relay = current_node_relay_list.begin(); relay != current_node_relay_list.end(); relay++ ) {
-							node->second.add_relay( node_relay_list[ it->first ] + relay->second, relay->first );
+
+		if( current_node_relay_list.size() ) {
+		
+			if( current_node.get_value() != START && current_node.get_value() != FINAL ) {
+				
+				// Proper format for self relay
+				if( current_node_relay_list.find( current_node.get_value() ) != current_node_relay_list.end() ) {
+					if( current_node_relay_list[ it->first ].size() ) {
+						std::string first_re = current_node_relay_list[ it->first ].size() == 1 ? current_node_relay_list[ current_node.get_value() ] + "*" : "(" + current_node_relay_list[ current_node.get_value() ] + ")*";
+						it->second.reset_relay( first_re, it->first );
+					}	
+				}
+				
+				// Looking for nodes that relay to the current one
+				for( std::map< int, Node >::iterator node = node_list.begin(); node != node_list.end(); node++ ) {
+					
+					if( node->first != it->first ) {
+						
+						std::map< int, std::string > node_relay_list = node->second.get_relays();
+						if( node_relay_list.count( current_node.get_value() ) ) {
+							
+							for( std::map< int, std::string >::iterator relay = current_node_relay_list.begin(); relay != current_node_relay_list.end(); relay++) {
+								std::string first_re = node_relay_list[ it->first ].size() == 1 ? node_relay_list[ it->first ] : "(" + node_relay_list[ it->first ] + ")";
+								std::string second_re = relay->second.size() == 1 ? relay->second : "(" + relay->second + ")";
+								
+								if( node_relay_list[ it->first ] == LAMBDA ) {
+									node->second.add_relay( it->second.get_relay( it->first ) + second_re, relay->first );
+								} else if( relay->second == LAMBDA ) {
+									node->second.add_relay( first_re + it->second.get_relay( it->first ), relay->first );
+								} else {
+									node->second.add_relay( first_re + it->second.get_relay( it->first ) + second_re, relay->first );
+								}	
+							}
 						}
 					}
 				}
+				it = node_list.erase( it );
+			} else {
+				it++;
 			}
-
+		} else {
+			it++;
 		}
 	}
 

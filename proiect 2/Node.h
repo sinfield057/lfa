@@ -31,6 +31,10 @@ public:
 	
 	// Add a new relay to "node" through "key"
 	void add_relay( std::string key, int node );
+
+	void reset_relay( std::string key, int node );
+
+	std::string get_relay( int node );
 	
 	// Delete relay
 	void delete_relay( int node );
