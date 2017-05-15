@@ -5,7 +5,7 @@
 
 #include "Node.h"
 
-#define LAMBDA "*"
+#define LAMBDA "L"
 #define START 999
 #define FINAL 1000
 
@@ -68,27 +68,25 @@ int main(int argc, char const *argv[]) {
 	node_list[ START ].add_relay( LAMBDA, n );
 
 	// Creating the RE
-	// for ( std::map< int, Node >::iterator it = node_list.begin(); it != node_list.end(); ++it ) {
+	for ( std::map< int, Node >::iterator it = node_list.begin(); it != node_list.end(); ++it ) {
 
-	// 	Node current_node = it->second;
-	// 	if( current_node.get_value() != START && current_node.get_value() != FINAL ) {
+		Node current_node = it->second;
+		std::map< int, std::string > current_node_relay_list = current_node.get_relays();
+		if( current_node.get_value() != START && current_node.get_value() != FINAL ) {
+			
+			for( std::map< int, Node >::iterator node = node_list.begin(); node != node_list.end(); node++ ) {
+				if( node->first != it->first ) {
+					std::map< int, std::string > node_relay_list = node->second.get_relays();
+					if( node_relay_list.count( current_node.get_value() ) ) {
+						for( std::map< int, std::string >::iterator relay = current_node_relay_list.begin(); relay != current_node_relay_list.end(); relay++ ) {
+							node->second.add_relay( node_relay_list[ it->first ] + relay->second, relay->first );
+						}
+					}
+				}
+			}
 
-	// 		std::string new_relay = "";
-	// 		std::map< std::string, int > relays_list = current_node.get_relays();
-	// 		for ( std::map< std::string, int >::iterator it2 = relays_list.begin(); it2 != relays_list.end(); it2++ ) {
-	// 			if ( it->first == it2->second ) {
-	// 				new_relay = new_relay + it2->first;
-	// 				new_relay = new_relay + "+";
-	// 				it->second.delete_relay( it2->first );
-	// 			}
-	// 		}
-	// 		new_relay = new_relay.size() ? new_relay.substr( 0, new_relay.size() - 1 ) : "";
-
-	// 		if( new_relay.size() ) {
-	// 			it->second.add_relay( new_relay, it->first );
-	// 		}
-	// 	}
-	// }
+		}
+	}
 
 	// Testing the list
 	for ( std::map< int, Node >::iterator it = node_list.begin(); it != node_list.end(); ++it ) {
